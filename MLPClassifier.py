@@ -7,6 +7,9 @@ from keras.layers import Dense, Dropout
 from keras.optimizers import SGD
 
 import numpy as np 
+from sklearn.preprocessing import StandardScaler
+
+import pickle
 
 class MLPClassifier:
     """
@@ -17,9 +20,10 @@ class MLPClassifier:
 
     def __init__(self):
         self.model = None
-        
+        self.scaler =None
 
    
+
     def train_model(self, layer_dims):
         """
         This function trains a multilayer perceptron model on the data and saves the model in the models directory
@@ -32,13 +36,19 @@ class MLPClassifier:
         dataset = np.loadtxt("./data/data_file.csv", delimiter=',')
         X = dataset[:,0:8]
         Y = dataset[:,8]
+        # Normalizing the data with l2 normalization 
+        scaler = StandardScaler()
+        X = scaler.fit_transform(X)
+        self.scaler = scaler
 
         # Defining the network architecture for the model 
         model = Sequential()
+            # Adding dropout regularization layer
         model.add( Dropout(0.2, input_shape=(8,) ) )
-        model.add( Dense( layer_dims[0], activation='relu' ) )
-        for i in range( 1 , len(layer_dims) ) :
-            model.add( Dense( layer_dims[i], activation='relu') )
+            # Adding fully connected relu neuron layers 
+        for neurons in layer_dims :
+            model.add( Dense( neurons, activation='relu') )
+            # Adding output layer 
         model.add( Dense( 1 , activation='sigmoid' ) )
 
         # Compiling the network to work with:
@@ -54,12 +64,15 @@ class MLPClassifier:
         
         self.model = model
         
-        # Serialize model to JSON
+        # Serializing model to JSON
         model_json = model.to_json()
         with open("./models/MLP.json", "w") as json_file:
             json_file.write(model_json)
-        # serialize weights to HDF5
+        # serializing weights to HDF5
         model.save_weights("./models/MLP.h5")
+        # serializing the Normalizer 
+        with open("./models/scaler.pkl","wb") as output_file:
+            pickle.dump(scaler, output_file)
         print("Saved model to disk")
 
 
@@ -81,6 +94,10 @@ class MLPClassifier:
                 self.model.load_weights("MLP.h5")
                 self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
                 print("Loaded model from disk")
+            # loading the serialized scaler file in 
+            with open("./models/scaler.pkl","rb") as pkl_file:
+                self.scaler = pickle.load(pkl_file)
         
-        predictions = self.model.predict(X)
+        X_norm = self.scaler.transform(X)
+        predictions = self.model.predict(X_norm)
         return predictions
