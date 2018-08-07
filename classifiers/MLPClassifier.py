@@ -3,7 +3,7 @@ simplefilter(action='ignore', category=FutureWarning)
 simplefilter(action='ignore', category=DeprecationWarning)
 
 from keras.models import Sequential, model_from_json
-from keras.layers import Dense, Dropout
+from keras.layers import Dense
 from keras.optimizers import adam
 from keras.regularizers import l2
 
