@@ -1,2 +1,4 @@
 #Ignoring the pycache directory 
 /__pycache__/
+/classifiers/__pycache__/
+/.ipynb_checkpoints/
