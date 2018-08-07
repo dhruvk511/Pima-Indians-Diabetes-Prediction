@@ -1,10 +1,11 @@
 import sys
 
-from MLPClassifier import MLPClassifier
+from classifiers import MLP
+
 
 def main():
-    model = MLPClassifier()
-    layer_dims = [ 12, 8 ]
-    model.train_model( layer_dims )
+    layer_dims = [32, 12, 1]
+    model = MLP(layer_dims)
+    print(model)
 
 if __name__ == "__main__" : main()
